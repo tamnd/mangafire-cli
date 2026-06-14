@@ -1,10 +1,8 @@
 # mangafire
 
-A command line for mangafire.
+Browse the [MangaFire](https://mangafire.to) manga catalog from the command line.
 
-`mangafire` is a single pure-Go binary. It speaks to mangafire over plain
-HTTPS, shapes the responses into clean records, and pipes into the rest of your
-tools. No API key, nothing to run alongside it.
+`mangafire` is a single pure-Go binary. No API key required.
 
 ## Install
 
@@ -12,8 +10,7 @@ tools. No API key, nothing to run alongside it.
 go install github.com/tamnd/mangafire-cli/cmd/mangafire@latest
 ```
 
-Or grab a prebuilt binary from the [releases](https://github.com/tamnd/mangafire-cli/releases), or run
-the container image:
+Or grab a prebuilt binary from the [releases](https://github.com/tamnd/mangafire-cli/releases), or run the container image:
 
 ```bash
 docker run --rm ghcr.io/tamnd/mangafire:latest --help
@@ -22,41 +19,50 @@ docker run --rm ghcr.io/tamnd/mangafire:latest --help
 ## Usage
 
 ```bash
-mangafire --help
-mangafire version
+# List top manga by most viewed
+mangafire list
+
+# List 60 most viewed manga (2 pages)
+mangafire list -p 2 -o table
+
+# List latest updated manhwa
+mangafire list --sort latest_updated --type manhwa -n 20
+
+# Sort options: most_viewed, latest_updated, new_release, title_az
+mangafire list --sort new_release -n 10
+
+# Output formats
+mangafire list -o json
+mangafire list -o csv -n 50
 ```
 
-This is a fresh scaffold. The command tree starts with `version`; build out the
-real commands in `cli/` on top of the `mangafire` library package.
+## Commands
 
-## Development
+| Command | Description |
+|---------|-------------|
+| `list` | List manga from the MangaFire catalog |
+| `version` | Show version information |
+
+## List flags
 
 ```
-cmd/mangafire/   thin main, wires cli.Root into fang
-cli/                 the cobra command tree
-mangafire/                the library: HTTP client and data models
-docs/                tago documentation site
+-s, --sort string    sort order: most_viewed|latest_updated|new_release|title_az (default "most_viewed")
+-t, --type string    filter by type: manga|manhwa|manhua|novel|one-shot|doujinshi
+-p, --pages int      number of pages to fetch (30 items per page) (default 1)
 ```
 
-```bash
-make build      # ./bin/mangafire
-make test       # go test ./...
-make vet        # go vet ./...
+## Global flags
+
 ```
-
-## Releasing
-
-Push a version tag and GitHub Actions runs GoReleaser, which builds the
-archives, Linux packages, the multi-arch GHCR image, checksums, SBOMs, and a
-cosign signature:
-
-```bash
-git tag v0.1.0
-git push --tags
+-o, --output string    output format: table|json|jsonl|csv|tsv|url|raw (default "auto")
+-n, --limit int        limit number of records (0 = all on fetched pages)
+    --fields strings   comma-separated columns to include
+    --no-header        omit header row
+    --template string  Go text/template per record
+    --timeout duration per-request timeout (default 30s)
+    --delay duration   minimum spacing between requests
+    --retries int      retry attempts on 429/5xx (default 3)
 ```
-
-The Homebrew and Scoop steps self-disable until their tokens exist, so the first
-release works with no extra secrets.
 
 ## License
 
